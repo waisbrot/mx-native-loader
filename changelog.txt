@@ -1,3 +1,10 @@
+Changes in version 1.3
+======================
+2008-04-25 richardv
+ * fix bug in DefaultJniExtractor.java which meant that jni libs called
+   *.jnilib (eg, on Darwin) weren't found. Thanks to 
+   Javier Iglesias <javier.iglesias@unil.ch>
+
 Changes in version 1.2
 ======================
 2008-03-26 richardv

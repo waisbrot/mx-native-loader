@@ -1,4 +1,4 @@
-// $Id: DefaultJniExtractor.java 135270 2008-01-16 16:00:27Z richardv $
+// $Id: DefaultJniExtractor.java 153852 2008-04-25 09:58:37Z richardv $
 package com.wapmx.nativeutils.jniloader;
 
 /*
@@ -67,7 +67,7 @@ public class DefaultJniExtractor implements JniExtractor {
          * if we don't find a .jnilib, try .dylib instead.
          */
         if(mappedlib.endsWith(".jnilib")) {
-            if(this.getClass().getClassLoader().getResource("META_INF/lib/"+mappedlib) == null)
+            if(this.getClass().getClassLoader().getResource("META-INF/lib/"+mappedlib) == null)
                 mappedlib = mappedlib.substring(0, mappedlib.length()-7)+".dylib";
         }
         
