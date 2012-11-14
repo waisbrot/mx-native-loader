@@ -2,11 +2,25 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wapmx.native</groupId>
     <artifactId>mx-native-loader</artifactId>
-    <name>MX Telecom native library loader</name>
-    <version>1.4</version>
+    <name>${project.artifactId}</name>
+    <version>1.5</version>
+
     <scm>
-        <connection>scm:svn:svn+ssh://svn.mxtelecom.com/svn/mx/native/tags/mx-native-loader-1.4</connection>
+        <connection>scm:svn:svn+ssh://svn.mxtelecom.com/svn/mx/native/tags/mx-native-loader-1.5</connection>
     </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -15,6 +29,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <distributionManagement>
         <repository>
             <id>mx-opensource</id>
@@ -27,7 +42,6 @@
             <url>scpexe://opensource/sites/opensource/maven/repo</url>
         </snapshotRepository>
     </distributionManagement>
-
 
     <profiles>
         <profile>

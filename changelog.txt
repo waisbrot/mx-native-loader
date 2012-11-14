@@ -1,3 +1,41 @@
+Changes in version 1.5
+======================
+2009-05-27 markjh
+ * Move most of the functionality of DefaultJniExtractor to BaseJniExtractor
+   with abstract getJniDir and getNativeDir.
+ * Create WebappJniExtractor and move the support for multiple classloaders
+   there. Update test to use this extractor.
+
+2009-05-26 markjh
+ * Add some more logging
+
+2009-04-28 markjh
+ * Remove unecessary forward slash in resource path
+
+2009-04-24 maxb
+ * Set source/target to Java 1.5.
+
+2009-04-23 maxb
+ * Make the temporary dir creation logic neater and embed a timestamp rather
+   than randomness to enable the possibility of correlating timestamp with
+   logs.
+ * Undeprecate the old-style constructor, as it's perfectly valid to not want
+   to bother specifying a classloader name in a single-classloader
+   application.
+
+2009-04-23 markjh
+ * Care for backwards compatibility.
+ * Use a temporary dir to extract jnilibs so apps don't have to specify a
+   unique id.
+
+2009-04-22 markjh
+ * Support including native code for different architectures in the same
+   application.
+ * Make it possible for the native-loader to load the same jni library in
+   different classloaders.
+ * Create a new file to write into rather than overwriting the preexisting and
+   possibly memory mapped file.
+
 Changes in version 1.4
 ======================
 2008-05-04 maxb
