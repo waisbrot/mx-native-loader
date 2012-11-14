@@ -22,6 +22,24 @@ public class MxSysInfo {
     }
     
     /**
+     * Alternative mx.sysinfos for a platform
+     * Libraries compiled for one OS can often work on another. For example libraries compiled for etch will probably 
+     * also work on lenny. 
+     * @param mxSysInfo
+     * @return
+     */
+    public static String[] alternativeMxSysInfos(String mxSysInfo) {
+        if (mxSysInfo.endsWith("Linux-c27cxx610")) { // lenny
+            return new String[] { 
+                    mxSysInfo.replace("Linux-c27cxx610", "Linux-c23cxx6"), // etch
+            };
+        } 
+        else {
+            return new String[] {};
+        }
+    }
+    
+    /**
      * Make a spirited attempt at guessing what the mx.sysinfo for the current jvm might be.
      */
     public static String guessMxSysInfo() {

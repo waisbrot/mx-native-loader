@@ -1,4 +1,4 @@
-// $Id: BaseJniExtractor.java 325571 2009-08-19 15:35:24Z markjh $
+// $Id: BaseJniExtractor.java 451529 2010-12-23 15:30:18Z markjh $
 // Copyright 2006 MX Telecom Ltd
 
 package com.wapmx.nativeutils.jniloader;
@@ -43,8 +43,14 @@ public abstract class BaseJniExtractor implements JniExtractor {
         String mxSysInfo = MxSysInfo.getMxSysInfo();
         
         if (mxSysInfo != null) {
-            nativeResourcePaths = new String[] { "META-INF/lib/" + mxSysInfo + "/",
-                    "META-INF/lib/" };
+            String[] alternatives = MxSysInfo.alternativeMxSysInfos(mxSysInfo);
+            
+            nativeResourcePaths = new String[alternatives.length + 2];
+            nativeResourcePaths[0] = "META-INF/lib/" + mxSysInfo + "/";
+            for (int i = 0; i < alternatives.length; i++) {
+                nativeResourcePaths[i + 1] = "META-INF/lib/" + alternatives[i] + "/";
+            }
+            nativeResourcePaths[nativeResourcePaths.length - 1] = "META-INF/lib/";
         }
         else {
             nativeResourcePaths = new String[] { "META-INF/lib/" };
