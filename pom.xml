@@ -3,9 +3,9 @@
     <groupId>com.wapmx.native</groupId>
     <artifactId>mx-native-loader</artifactId>
     <name>MX Telecom native library loader</name>
-    <version>1.3</version>
+    <version>1.4</version>
     <scm>
-        <connection>scm:svn:svn+ssh://svn.mxtelecom.com/svn/mx/native/tags/mx-native-loader-1.3</connection>
+        <connection>scm:svn:svn+ssh://svn.mxtelecom.com/svn/mx/native/tags/mx-native-loader-1.4</connection>
     </scm>
     <dependencies>
         <dependency>

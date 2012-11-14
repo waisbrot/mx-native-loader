@@ -1,15 +1,19 @@
-// $Id: DefaultJniExtractor.java 153852 2008-04-25 09:58:37Z richardv $
+// $Id: DefaultJniExtractor.java 155283 2008-05-04 21:22:22Z maxb $
 package com.wapmx.nativeutils.jniloader;
 
 /*
  * Copyright 2006 MX Telecom Ltd.
  */
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
+import java.util.Enumeration;
 
 /**
  * @author Richard van der Hoff <richardv@mxtelecom.com>
@@ -52,13 +56,7 @@ public class DefaultJniExtractor implements JniExtractor {
         return jniDir;
     }
 
-    /**
-     * extract a JNI library from the classpath
-     *
-     * @param libname   - System.loadLibrary() - compatible library name
-     * @return the extracted file
-     * @throws IOException
-     */
+    /** {@inheritDoc} */
     public File extractJni(String libname) throws IOException {
         String mappedlib = System.mapLibraryName(libname);
 
@@ -72,6 +70,19 @@ public class DefaultJniExtractor implements JniExtractor {
         }
         
         return extractResource("META-INF/lib/"+mappedlib,mappedlib);
+    }
+    
+    /** {@inheritDoc} */
+    public void extractRegistered() throws IOException {
+        Enumeration resources = this.getClass().getClassLoader().getResources("META-INF/lib/AUTOEXTRACT.LIST");
+        while (resources.hasMoreElements()) {
+            URL res = (URL)resources.nextElement();
+            BufferedReader r = new BufferedReader(new InputStreamReader(res.openStream(), "UTF-8"));
+            String line;
+            while ((line = r.readLine()) != null) {
+                extractResource("META-INF/lib/" + line, line);
+            }
+        }
     }
     
     /**
