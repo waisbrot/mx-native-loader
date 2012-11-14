@@ -3,10 +3,10 @@
     <groupId>com.wapmx.native</groupId>
     <artifactId>mx-native-loader</artifactId>
     <name>${project.artifactId}</name>
-    <version>1.6</version>
+    <version>1.7</version>
 
     <scm>
-        <connection>scm:svn:svn+ssh://svn.mxtelecom.com/svn/mx/native/tags/mx-native-loader-1.6</connection>
+        <connection>scm:svn:svn+ssh://svn.mxtelecom.com/svn/mx/native/tags/mx-native-loader-1.7</connection>
     </scm>
 
     <build>

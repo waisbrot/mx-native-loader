@@ -1,3 +1,10 @@
+Changes in version 1.7
+======================
+
+2009-08-21 markjh
+ * Guess the mx.sysinfo string to use if it is not specified by inspecting the libc and libstdc++ binaries installed on the system
+
+
 Changes in version 1.6
 ======================
 
