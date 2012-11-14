@@ -1,3 +1,9 @@
+Changes in version 1.6
+======================
+
+2009-08-13 markjh
+ * Pick which JniExtractor to use by default based on what classloader is used to load NativeLoader
+
 Changes in version 1.5
 ======================
 2009-05-27 markjh

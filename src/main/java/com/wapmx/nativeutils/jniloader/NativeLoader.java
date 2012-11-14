@@ -1,4 +1,4 @@
-// $Id: NativeLoader.java 276981 2009-04-23 22:29:52Z maxb $
+// $Id: NativeLoader.java 322879 2009-08-13 16:02:00Z markjh $
 // Copyright 2006 MX Telecom Ltd
 
 package com.wapmx.nativeutils.jniloader;
@@ -39,7 +39,23 @@ public class NativeLoader {
 
     static {
         try {
-            jniExtractor = new DefaultJniExtractor();
+            /* 
+             * We provide two implementations of JniExtractor
+             * 
+             * The first will work with transitively, dynamically linked libraries with shared global variables 
+             *   (e.g. dynamically linked c++) but can only be used by one ClassLoader in the JVM.
+             *   
+             * The second can be used by multiple ClassLoaders in the JVM but will only work if global variables 
+             *   are not shared between transitively, dynamically linked libraries.
+             * 
+             * For convenience we assume that if the NativeLoader is loaded by the system ClassLoader then it should be 
+             *   use the first form, and that if it is loaded by a different ClassLoader then it should use the second.
+             */
+            if (NativeLoader.class.getClassLoader() == ClassLoader.getSystemClassLoader()) {
+                jniExtractor = new DefaultJniExtractor();
+            } else {
+                jniExtractor = new WebappJniExtractor("Classloader");
+            }
         }
         catch (IOException e) {
             throw new ExceptionInInitializerError(e);
