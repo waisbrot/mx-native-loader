@@ -1,5 +1,5 @@
 /*
- * $Id: JniExtractorTest.java 61352 2006-06-07 18:55:14Z richardv $
+ * $Id: JniExtractorTest.java 287492 2009-05-27 15:12:30Z markjh $
  *
  * Copyright 2006 MX Telecom Ltd.
  */
@@ -8,6 +8,7 @@ package com.wapmx.nativeutils.jniloader;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import junit.framework.TestCase;
 
@@ -25,8 +26,9 @@ public class JniExtractorTest extends TestCase {
         System.setProperty("java.library.tmpdir", "target/extractortest/foo");
         System.setProperty("java.library.debug", "1");
         
-        DefaultJniExtractor jniExtractor = new DefaultJniExtractor();
-        jniExtractor.extractResource("com/wapmx/nativeutils/jniloader/JniExtractorTest.class", "outputtest");
+        BaseJniExtractor jniExtractor = new WebappJniExtractor("ExtractorTest");
+        URL test = getClass().getClassLoader().getResource("com/wapmx/nativeutils/jniloader/JniExtractorTest.class");
+        jniExtractor.extractResource(jniExtractor.getNativeDir(), test, "outputtest");
         assertTrue(output.exists());
     }
 }

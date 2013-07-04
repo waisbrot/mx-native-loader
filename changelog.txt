@@ -1,10 +1,80 @@
+Changes in version 1.8
+======================
+
+2010-12-23 markjh
+ * Supply alternative mx.sysinfo strings to use when searching for libraries so we can use artifacts built for older platforms for newer platforms.
+
+
+Changes in version 1.7
+======================
+
+2009-08-21 markjh
+ * Guess the mx.sysinfo string to use if it is not specified by inspecting the libc and libstdc++ binaries installed on the system
+
+
+Changes in version 1.6
+======================
+
+2009-08-13 markjh
+ * Pick which JniExtractor to use by default based on what classloader is used to load NativeLoader
+
+Changes in version 1.5
+======================
+2009-05-27 markjh
+ * Move most of the functionality of DefaultJniExtractor to BaseJniExtractor
+   with abstract getJniDir and getNativeDir.
+ * Create WebappJniExtractor and move the support for multiple classloaders
+   there. Update test to use this extractor.
+
+2009-05-26 markjh
+ * Add some more logging
+
+2009-04-28 markjh
+ * Remove unecessary forward slash in resource path
+
+2009-04-24 maxb
+ * Set source/target to Java 1.5.
+
+2009-04-23 maxb
+ * Make the temporary dir creation logic neater and embed a timestamp rather
+   than randomness to enable the possibility of correlating timestamp with
+   logs.
+ * Undeprecate the old-style constructor, as it's perfectly valid to not want
+   to bother specifying a classloader name in a single-classloader
+   application.
+
+2009-04-23 markjh
+ * Care for backwards compatibility.
+ * Use a temporary dir to extract jnilibs so apps don't have to specify a
+   unique id.
+
+2009-04-22 markjh
+ * Support including native code for different architectures in the same
+   application.
+ * Make it possible for the native-loader to load the same jni library in
+   different classloaders.
+ * Create a new file to write into rather than overwriting the preexisting and
+   possibly memory mapped file.
+
+Changes in version 1.4
+======================
+2008-05-04 maxb
+ * Add META-INF/lib/AUTOEXTRACT.LIST / extractRegistered() functionality.
+
+Changes in version 1.3
+======================
+2008-04-25 richardv
+ * Fix bug in DefaultJniExtractor.java which meant that JNI libs called
+   *.jnilib (eg, on Darwin) weren't found. Thanks to 
+   Javier Iglesias <javier.iglesias@unil.ch>.
+
 Changes in version 1.2
 ======================
 2008-03-26 richardv
- * add changelog and license to source packages
+ * Add changelog and license to source packages.
 
 Changes in version 1.1
 ======================
 2008-01-16 richardv
- * migrate to svn
- * add a fudge to deal with .dylibs on MacOS X
+ * Migrate to svn
+ * Add a fudge to deal with .dylibs on MacOS X.
