@@ -3,7 +3,12 @@
 
 package com.wapmx.nativeutils.jniloader;
 
+import java.io.File;
 import java.io.IOException;
+
+import org.apache.commons.io.FilenameUtils;
+
+import com.wapmx.nativeutils.filters.PathFilter;
 
 /**
  * Provides a means of loading JNI libraries which are stored within a jar.
@@ -73,19 +78,10 @@ public class NativeLoader {
      * @throws SecurityException if a security manager exists and its <code>checkLink</code> method doesn't allow
      *             loading of the specified dynamic library
      */
-    public static void loadLibrary(String libname) throws IOException {
-        System.load(jniExtractor.extractJni(libname).getAbsolutePath());
-    }
-
-    /**
-     * Extract all libraries registered for auto-extraction by way of META-INF/lib/AUTOEXTRACT.LIST resources. The
-     * application must call {@link #extractRegistered()} at some suitably early point in its initialization if it is
-     * using libraries packaged in this way.
-     * 
-     * @throws IOException if there is a problem extracting the libraries
-     */
-    public static void extractRegistered() throws IOException {
-        jniExtractor.extractRegistered();
+    public static void loadLibrary(Class<?> sameTree, PathFilter filter) throws IOException {
+        for (File jni : jniExtractor.extractJni(sameTree, filter)) {
+        	System.load(jni.getAbsolutePath());
+        }
     }
 
     /**

@@ -9,6 +9,10 @@ package com.wapmx.nativeutils.jniloader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+
+import com.wapmx.nativeutils.filters.PathFilter;
+import com.wapmx.nativeutils.filters.RootPath;
 
 import junit.framework.TestCase;
 
@@ -17,7 +21,7 @@ import junit.framework.TestCase;
  */
 public class JniExtractorTest extends TestCase {
     public void testExtract() throws IOException {
-        File output = new File("target/extractortest/foo/outputtest");
+        File output = new File("target/extractortest/foo/JniExtractorTest.class");
         output.delete();
         new File("target/extractortest/foo").delete();
         new File("target/extractortest").delete();
@@ -28,7 +32,7 @@ public class JniExtractorTest extends TestCase {
         
         BaseJniExtractor jniExtractor = new WebappJniExtractor("ExtractorTest");
         URL test = getClass().getClassLoader().getResource("com/wapmx/nativeutils/jniloader/JniExtractorTest.class");
-        jniExtractor.extractResource(jniExtractor.getNativeDir(), test, "outputtest");
+        jniExtractor.extractResource(jniExtractor.getNativeDir(), Collections.singleton(test));
         assertTrue(output.exists());
     }
 }

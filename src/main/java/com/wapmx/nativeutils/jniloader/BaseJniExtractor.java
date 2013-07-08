@@ -3,17 +3,31 @@
 
 package com.wapmx.nativeutils.jniloader;
 
-import java.io.BufferedReader;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import com.wapmx.nativeutils.MxSysInfo;
+import com.wapmx.nativeutils.filters.IOFileFilterWrapper;
+import com.wapmx.nativeutils.filters.PathFilter;
 
 /**
  * @author Richard van der Hoff <richardv@mxtelecom.com>
@@ -71,64 +85,87 @@ public abstract class BaseJniExtractor implements JniExtractor {
      */
     public abstract File getJniDir();
 
-    /** {@inheritDoc} */
-    public File extractJni(String libname) throws IOException {
-        String mappedlib = System.mapLibraryName(libname);
-        /*
-         * On Darwin, the default mapping is to .jnilib; but we use .dylibs so that library interdependencies are
-         * handled correctly. if we don't find a .jnilib, try .dylib instead.
-         */
-        URL lib = null;
+    /**
+     * Modified from http://www.uofr.net/~greg/java/get-resource-listing.html
+     * 
+     * List directory contents for a resource folder. Not recursive.
+     * This is basically a brute-force implementation.
+     * Works for regular files and also JARs.
+     * 
+     * @author Greg Briggs
+     * @param sameTree Any java class that lives in the same place as the resources you want.
+     * @param path Should end with "/", but not start with one.
+     * @return Just the name of each member item, not the full paths.
+     * @throws URISyntaxException 
+     * @throws IOException 
+     */
+    private static Collection<URL> getResourceListing(Class<?> sameTree, final PathFilter filter) throws IOException {
+    	String sameTreePath = sameTree.getName().replace('.', '/') + ".class";
+        URL dirURL = sameTree.getClassLoader().getResource(sameTreePath);
+        if (dirURL != null && dirURL.getProtocol().equals("file")) {
+        	try {
+        		ArrayList<URL> result = new ArrayList<URL>();
+				File basePath = new File(dirURL.toURI()).getParentFile();
+				int index = 0;
+				while ((index = sameTreePath.indexOf('/', index) + 1) > 0) {
+					basePath = basePath.getParentFile();
+				}
+				Iterator<File> iter = FileUtils.iterateFiles(basePath, 
+													new IOFileFilterWrapper(filter, basePath), 
+													TrueFileFilter.INSTANCE);
+				while (iter.hasNext()) {
+					result.add(iter.next().toURI().toURL());
+				}
+				return result;
+			} catch (URISyntaxException e) {
+				throw new IOException("Unable to convert the directory URL into a File", e);
+			} catch (MalformedURLException e) {
+				throw new IOException("Unable to convert the path File into a URL", e);
+			}
+        } 
 
-        for (int i = 0; i < nativeResourcePaths.length; i++) {
-            lib = this.getClass().getClassLoader().getResource(nativeResourcePaths[i] + mappedlib);
-            if (lib != null)
-                break;
-            if (mappedlib.endsWith(".jnilib")) {
-                lib = this.getClass().getClassLoader().getResource(
-                        nativeResourcePaths[i] + mappedlib.substring(0, mappedlib.length() - 7) + ".dylib");
-                if (lib != null) {
-                    mappedlib = mappedlib.substring(0, mappedlib.length() - 7) + ".dylib";
-                    break;
-                }
-            }
+        if (dirURL == null) {
+          /* 
+           * In case of a jar file, we can't actually find a directory.
+           * Have to assume the same jar as clazz.
+           */
+          String me = sameTree.getName().replace(".", "/")+".class";
+          dirURL = sameTree.getClassLoader().getResource(me);
         }
-
-        if (lib != null) {
-            return extractResource(getJniDir(), lib, mappedlib);
-        }
-        else {
-            throw new IOException("Couldn't find jni library " + mappedlib + " on the classpath");
-        }
+        
+        if (dirURL.getProtocol().equals("jar")) {
+          /* A JAR path */
+          String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+          JarFile jar = null;
+          ArrayList<URL> result = null;
+          try {
+        	  jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+        	  Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+        	  result = new ArrayList<URL>(); //avoid duplicates in case it is a subdirectory
+        	  while(entries.hasMoreElements()) {
+        		  URL name = new URL(entries.nextElement().getName());
+        		  if (filter.apply(name.getFile())) { //filter according to the path
+        			  result.add(name);
+        		  }
+        	  }
+          } finally {
+        	  if (jar != null)
+        		  jar.close();
+          }
+          checkNotNull(result);
+          return result;
+        }      
+        throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
     }
-
+    
     /** {@inheritDoc} */
-    public void extractRegistered() throws IOException {
-        if (debug) System.err.println("Extracting libraries registered in classloader " + this.getClass().getClassLoader());
-        for (int i = 0; i < nativeResourcePaths.length; i++) {
-            Enumeration<URL> resources = this.getClass().getClassLoader().getResources(
-                    nativeResourcePaths[i] + "AUTOEXTRACT.LIST");
-            while (resources.hasMoreElements()) {
-                URL res = resources.nextElement();
-                if (debug) System.err.println("Extracting libraries listed in " + res);
-                BufferedReader r = new BufferedReader(new InputStreamReader(res.openStream(), "UTF-8"));
-                String line;
-                while ((line = r.readLine()) != null) {
-                    URL lib = null;
-                    for (int j = 0; j < nativeResourcePaths.length; j++) {
-                        lib = this.getClass().getClassLoader().getResource(nativeResourcePaths[j] + line);
-                        if (lib != null)
-                            break;
-                    }
-                    if (lib != null) {
-                        extractResource(getNativeDir(), lib, line);
-                    }
-                    else {
-                        throw new IOException("Couldn't find native library " + line + "on the classpath");
-                    }
-                }
-            }
-        }
+    public Collection<File> extractJni(Class<?> sameTree, PathFilter filter) throws IOException {
+    	Collection<URL> paths = getResourceListing(sameTree, filter);
+    	if (paths.isEmpty()) {
+    		throw new IOException("No library found for filter "+filter);
+    	} else {
+    		return extractResource(getJniDir(), paths);
+    	}
     }
 
     /**
@@ -140,20 +177,25 @@ public abstract class BaseJniExtractor implements JniExtractor {
      * @return the extracted file
      * @throws IOException
      */
-    File extractResource(File dir, URL resource, String outputname) throws IOException {
-        InputStream in = resource.openStream();
-        File outfile = new File(dir, outputname);
-        // Create a new file rather than writing into old file
-        File outfiletemp = File.createTempFile(outputname, null, getJniDir());
-        if (debug)
-            System.err.println("Extracting '" + resource + "' to '" + outfile.getAbsolutePath() + "'");
-        FileOutputStream out = new FileOutputStream(outfiletemp);
-        copy(in, out);
-        out.close();
-        in.close();
-        outfiletemp.renameTo(outfile);
-        outfile.deleteOnExit();
-        return outfile;
+    ArrayList<File> extractResource(File dir, Collection<URL> resources) throws IOException {
+    	ArrayList<File> extracted = new ArrayList<File>();
+    	for (URL resource : resources) {
+    		InputStream in = resource.openStream();
+    		String outputname = FilenameUtils.getName(resource.getFile());
+    		File outfile = new File(dir, outputname);
+    		// Create a new file rather than writing into old file
+    		File outfiletemp = File.createTempFile(outputname, null, getJniDir());
+    		if (debug)
+    			System.err.println("Extracting '" + resource + "' to '" + outfile.getAbsolutePath() + "'");
+    		FileOutputStream out = new FileOutputStream(outfiletemp);
+    		copy(in, out);
+    		out.close();
+    		in.close();
+    		outfiletemp.renameTo(outfile);
+    		outfile.deleteOnExit();
+    		extracted.add(outfile);
+    	}
+        return extracted;
     }
 
     /**
