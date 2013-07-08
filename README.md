@@ -12,10 +12,10 @@ native-loader lib take some filters that describe what the correct native librar
 For example, this looks for a library whose name is similar to "jhdf5" (eg "libjhdf5.jnilib" or "libjhdf5.dylib"),
 and which is located under /META-INF/lib within the same package tree as the loader-class:
 
-  public class Loader {
-    public static void load() {
-      AndFilter filter = new AndFilter();
-      filter.and(new RootPath("/META-INF/lib")).and(new LibraryName("jhdf5"));
-      NativeLoader.loadLibrary(Loader.class, filter);
+    public class Loader {
+      public static void load() {
+        AndFilter filter = new AndFilter();
+        filter.and(new RootPath("/META-INF/lib")).and(new LibraryName("jhdf5"));
+        NativeLoader.loadLibrary(Loader.class, filter);
+      }
     }
-  }
